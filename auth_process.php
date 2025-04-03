@@ -8,6 +8,8 @@
 
     $message = new Message($BASE_URL);
 
+    $userDAO = new UserDAO($conn, $BASE_URL);
+
     
 
     //resgata o tipo de form
@@ -25,6 +27,35 @@
         //verificação de dados
         if($name && $lastname && $email && $password) {
 
+            //verificar se as senhas são identicas
+            if($password === $confirmpassword) {
+
+                //verificar se o email ja esta cadastrado no db
+                if($userDAO->findByEmail($email) === false) {
+
+                    $user = new User();
+
+                    //criação de token e senhas
+                    $userToken = $user->generateToken();
+                    $finalPassword = $user->generatePassword($password);
+
+                    $user->name = $name;
+                    $user->lastname = $lastname;
+                    $user->email = $email;
+                    $user->password = $finalPassword;
+                    $user->token = $userToken;
+                    
+                    $auth = true;
+
+                    $userDAO->create($user, $auth);
+
+                } else {
+                    $message->setMessage('Usuário já cadastrado, use outro email.', 'error', 'back');
+                }
+
+            } else {
+                $message->setMessage('As senhas devem ser iguais.', 'error', 'back');
+            }
 
         //mensagem de erro pois faltam dados 
         } else {
