@@ -51,14 +51,53 @@
             }
 
         }
-        public function update(User $user) {
+        public function update(User $user, $redirect=true) {
 
+            $stmt = $this->conn->prepare('UPDATE users SET 
+            name = :name,
+            lastname = :lastname,
+            email = :email,
+            image = :image,
+            bio = :bio,
+            token = :token
+            WHERE id = :id');
 
+            $stmt->bindParam(':name', $user->name);
+            $stmt->bindParam(':lastname', $user->lastname);
+            $stmt->bindParam(':email', $user->email);
+            $stmt->bindParam(':image', $user->image);
+            $stmt->bindParam(':bio', $user->bio);
+            $stmt->bindParam(':token', $user->token);
+            $stmt->bindParam(':id', $user->id);
+
+            $stmt->execute();
+
+            if($redirect) {
+
+                //redireciona para o perfil do usuário
+                $this->message->setMessage( 'Dados atualizados com sucesso!', 'success', $BASE_URL.'editprofile.php');
+            }
 
         }
         public function verifyToken($protected = false) {
 
+            if(!empty($_SESSION['token'])) {
 
+                //pega o token da seção
+                $token = $_SESSION['token'];
+
+                //verifica se o user existe através do token
+                $user = $this->findByToken($token);
+                if($user) {
+                    return $user;
+                } else if($protected) {
+                    //caso não seja encontrado nenhum user, redireciona para a página de login
+                    $this->message->setMessage('Você precisa realizar o login para continuar.', 'error', 'auth.php');
+                }
+            } else if($protected) {
+                //caso não seja encontrado nenhum user, redireciona para a página de login
+                $this->message->setMessage('Você precisa realizar o login para continuar.', 'error', 'auth.php');
+            }
 
         }
         public function setTokenToSession($token, $redirect = true) {
@@ -69,13 +108,36 @@
             if($redirect) {
 
                 //redireciona para o perfil do usuário
-                $this->message->setMessage( 'Seja bem-vindo!', 'success', $BASE_URL.'editprofile.php');
+                $this->message->setMessage( 'Seja bem-vindo!', 'success', 'editprofile.php');
             }
 
         }
         public function authenticateUser($email, $password) {
 
+            $user = $this->findByEmail($email);
 
+            if($user) {
+
+                //checar se as senhas são identicas
+                if(password_verify($password, $user->password)) {
+
+                    $token = $user->generateToken();
+
+                    $this->setTokenToSession($token, false);
+
+                    //atualizar o token do usuário
+                    $user->token = $token;
+                    $this->update($user, false);
+
+                    return true;
+
+                } else {
+                    return false;
+                }
+
+            } else {
+                return false;
+            }
 
         }
         public function findByEmail($email) {
@@ -109,9 +171,37 @@
         }
         public function findByToken($token) {
 
+            if($token != '') {
+                $stmt = $this->conn->prepare('SELECT * FROM users WHERE token = :token');
 
+                $stmt->bindParam(':token', $token);
+
+                $stmt->execute();
+
+                if($stmt->rowCount() > 0) {
+
+                    $data = $stmt->fetch();
+                    $user = $this->buildUser($data);
+
+                    return $user;
+
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        public function destroyToken() {
+
+            //remove o token da seção
+            $_SESSION['token'] = '';
+
+            $this->message->setMessage('Você fez o logout com sucesso!', 'success', 'index.php');
 
         }
+
         public function changePassword(User $user) {
 
 
