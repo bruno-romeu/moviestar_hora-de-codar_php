@@ -20,4 +20,3 @@
         <a href="<?= $BASE_URL ?>movie.php?id=<?= $movie->id ?>" class="btn btn-primary card-btn">Conhecer</a>
     </div>
     </div>
-</div>
