@@ -15,7 +15,7 @@
         <div id="footer-links-container">
             <ul>
                 <li>
-                    <a href="#">Adicionar Filme</a>
+                    <a href="<?= $BASE_URL ?>newmovie.php">Adicionar Filme</a>
                 </li>
                 <li>
                     <a href="#">Adicionar Crítica</a>

@@ -17,7 +17,7 @@
                 <input type="hidden" name="type" value="update">
                 <div class="row">
                     <div class="col-md-4">
-                        <h1><?= $userData->name, $userData->lastname?></h1>
+                        <h1><?= $userData->name ?> <?=$userData->lastname?></h1>
                         <p class="page-description">Altere seus dados no formulário abaixo: </p>
                         <div class="form-group">
                             <label for="name">Nome: </label>
