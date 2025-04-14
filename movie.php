@@ -36,6 +36,8 @@
 
     //resgatar a review do filme
 
+    $alreadyReviewed = false;
+
 ?>
 
 <div id="main-container" class="container-fluid">
@@ -58,6 +60,8 @@
         <div class="offset-md-1 col-md-10" id="reviews-container">
             <h3 id="reviews-title">Avaliações: </h3>
             <!-- verifica se habilita a revisão para o usuário -->
+
+            <?php if(!empty($userData) && !$userOwnsMovie && !$alreadyReviewed): ?>
             <div class="col-md-12" id="review-form-container">
                 <h4>Envie sua avaliação: </h4>
                 <p class="page-description">Preencha o formulário com a nota e comentário sobre o filme</p>
@@ -87,6 +91,7 @@
                     <input type="submit" class="btn card-btn" value="Enviar comentário">
                 </form>
             </div>
+            <?php endif; ?>
             <!-- comentários -->
             <div class="col-md-12 review">
                 <div class="row">

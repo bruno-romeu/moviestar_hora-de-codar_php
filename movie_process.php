@@ -75,6 +75,98 @@
             $message->setMessage("Você precisa adicionar pelo menos: título, descrição e categoria.", "error", "back");
         }
 
+    } else if($type === 'delete') {
+
+        $id = filter_input(INPUT_POST, 'id');
+
+        $movie = $movieDAO->findById($id);
+
+        if($movie) {
+
+            if($movie->users_id === $userData->id) {
+
+                $movieDAO->destroy($movie->id);
+
+            } else {
+                $message->setMessage("Informações inválidas!", "error", "index.php");
+            }
+
+        } else {
+            $message->setMessage("Informações inválidas!", "error", "index.php");
+        }
+
+    } else if($type === 'update') {
+
+        $title = filter_input(INPUT_POST, "title");
+        $description = filter_input(INPUT_POST, "description");
+        $trailer = filter_input(INPUT_POST, "trailer");
+        $category = filter_input(INPUT_POST, "category");
+        $length = filter_input(INPUT_POST, "length"); 
+        $id = filter_input(INPUT_POST, "id"); 
+
+        $movie = new Movie;
+
+        $movieData = $movieDAO->findById($id);
+
+        if($movieData) {
+
+            if($movieData->users_id === $userData->id) {
+
+                if(!empty($title) && !empty($description) && !empty($category)) {   
+                    $movieData->title = $title;
+                    $movieData->description = $description;
+                    $movieData->trailer = $trailer;
+                    $movieData->category = $category;
+                    $movieData->length = $length;
+
+                    if(isset($_FILES['image']) && !empty($_FILES['image']['tmp_name'])) {
+
+                        $image = $_FILES['image'];
+                        $imageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                        $jpgArray = ['image/jpeg', 'image/jpg'];
+        
+                        if(in_array($image['type'], $imageTypes)) {
+        
+                            $imageFile = false;
+                            
+                            if(in_array($image['type'], $jpgArray)) {
+            
+                                $imageFile = imagecreatefromjpeg($image['tmp_name']);
+            
+                            } else if($image['type'] === 'image/png') {
+                                $imageFile = imagecreatefrompng($image['tmp_name']);
+                            }
+            
+                            if($imageFile !== false) {
+                                $imageName = $movie->imageGenerateName();
+            
+                                imagejpeg($imageFile, "./img/movies/" . $imageName, 100);
+            
+                                $movieData->image = $imageName;
+                            } else {
+                                $message->setMessage("Erro ao processar a imagem, tente novamente!", "error" , "back");
+                            }
+            
+                        } else {
+                            $message->setMessage("Tipo inválido de imagem, insira png ou jpg!", "error" , "back");
+                        }
+                    }
+                    $movieDAO->update($movieData);
+
+                } else {
+                    $message->setMessage("Você precisa adicionar pelo menos: título, descrição e categoria!", "error", "back");
+                }
+
+                
+            } else {
+                $message->setMessage("Informações inválidas!", "error", "index.php");
+            }
+
+        } else {
+            $message->setMessage("Informações inválidas!", "error", "index.php");
+        }
+
+
     } else {
         $message->setMessage("Informações inválidas!", "error", "index.php");
     }
