@@ -424,6 +424,18 @@
     text-decoration: none;
 }
 
+/* search */
+#search-title{
+    font-size: 40px;
+}
+
+#search-result,
+.back-link{
+    color: #f5c518;
+}
+
+
+
 /* footer */
 #footer{
     background-color: #000;
